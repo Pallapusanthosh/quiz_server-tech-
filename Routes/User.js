@@ -2,8 +2,13 @@ const express = require("express");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const tokenCheck = require("../Middleware/tokenCheck");
 const User = require("../Models/User");
 const router = express.Router();
+
+router.get("/", tokenCheck, (req, res) => {
+  res.status(200).json({ user: req.user });
+});
 
 router.post("/signup", async (req, res) => {
   const { email, name, password } = req.body;
@@ -23,7 +28,12 @@ router.post("/signup", async (req, res) => {
     });
 
     const token = jwt.sign(
-      { email: result.email, id: result._id },
+      {
+        email: result.email,
+        id: result._id,
+        name: result.name,
+        password: result.password,
+      },
       process.env.SECRET_KEY,
       { expiresIn: "3h" }
     );
@@ -52,7 +62,12 @@ router.post("/signin", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { email: existingUser.email, id: existingUser._id },
+      {
+        email: existingUser.email,
+        id: existingUser._id,
+        name: existingUser.name,
+        password: existingUser.password,
+      },
       process.env.SECRET_KEY,
       { expiresIn: "3h" }
     );
