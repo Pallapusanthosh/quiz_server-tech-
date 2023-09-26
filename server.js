@@ -4,12 +4,16 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 
+const userRouter = require("./Routes/User");
+
 const app = express();
 dotenv.config();
 
 app.use(cors());
 app.use(bodyParser.json({ limit: "30mb" }));
 app.use(bodyParser.urlencoded({ limit: "30mb" }));
+
+app.use("/user", userRouter);
 
 mongoose
   .connect(process.env.MONGOOSE_URL)
