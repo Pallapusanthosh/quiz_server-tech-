@@ -17,7 +17,7 @@ router.post("/", async (req, res) => {
   try {
     const newQuiz = await new Quiz(data);
     newQuiz.save();
-    console.log(newQuiz);
+    res.status(200).json(newQuiz);
   } catch (error) {
     console.log(error.message);
   }
@@ -37,13 +37,12 @@ router.delete("/:id", tokenCheck, async (req, res) => {
   const { id } = req.params;
   try {
     const deletedQuiz = await Quiz.findByIdAndDelete(id);
-    console.log(deletedQuiz);
   } catch (error) {
     console.log("Error : ", error.message);
   }
 });
 
-router.post("/:id/result", async (req, res) => {
+router.post("/:id/result", tokenCheck, async (req, res) => {
   const { id } = req.params;
   const { quizResult } = req.body;
   try {
@@ -54,7 +53,7 @@ router.post("/:id/result", async (req, res) => {
       },
       { new: true, useFindAndModify: false }
     );
-    console.log(updatedQuiz);
+    res.status(200).json(updatedQuiz);
   } catch (error) {
     console.log(error.message);
   }
