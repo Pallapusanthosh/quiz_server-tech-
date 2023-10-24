@@ -37,6 +37,7 @@ router.post("/signup", async (req, res) => {
       process.env.SECRET_KEY,
       { expiresIn: "3h" }
     );
+    delete user.password;
     res.status(200).json({ user: result, token });
   } catch (error) {
     console.error(error);
