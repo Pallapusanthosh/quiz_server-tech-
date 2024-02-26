@@ -3,7 +3,7 @@ const tokenCheck = require("../Middleware/tokenCheck");
 const Quiz = require("../Models/Quiz");
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", tokenCheck, async (req, res) => {
   try {
     const quizzes = await Quiz.find().sort({ createdAt: -1 });
     res.status(200).json(quizzes);
