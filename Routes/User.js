@@ -47,10 +47,9 @@ router.post("/signup", async (req, res) => {
 
 router.post("/signin", async (req, res) => {
   const { email, password } = req.body;
-  const user = "user";
   try {
     const existingUser = await User.findOne({ email: email });
-    if (!existingUser && !user) {
+    if (!existingUser) {
       return res.status(404).json({ message: "User Not Found" });
     }
 
@@ -58,20 +57,21 @@ router.post("/signin", async (req, res) => {
       password,
       existingUser.password
     );
-    if (!isPasswordCorrect && !user) {
-      return res.status(400).json({ message: "Credentials are wrong" });
+    if (!isPasswordCorrect) {
+      return res.status(400).json({ message: "Invalid Credentials" });
     }
 
     const token = jwt.sign(
       {
-        email: existingUser.email || "user.@gmail.com",
-        id: existingUser._id || "user if",
-        name: existingUser.name || user,
-        password: existingUser.password || user,
+        email: existingUser.email,
+        id: existingUser._id,
+        name: existingUser.name,
+        password: existingUser.password,
       },
       process.env.SECRET_KEY,
       { expiresIn: "3h" }
     );
+    existingUser.password = "";
     res.status(200).json({ user: existingUser, token });
   } catch (error) {
     console.error(error);
