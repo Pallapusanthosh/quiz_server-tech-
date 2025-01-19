@@ -1,62 +1,42 @@
-const express = require("express");
-const tokenCheck = require("../Middleware/tokenCheck");
-const Quiz = require("../Models/Quiz");
+const express = require('express');
+const cors = require('cors');
+const Quiz = require('../Models/Quiz'); 
+const adminTokenCheck = require('../Middleware/tokenCheck');
+
 const router = express.Router();
 
-router.get("/", tokenCheck, async (req, res) => {
-  try {
-    const quizzes = await Quiz.find().sort({ createdAt: -1 });
-    res.status(200).json(quizzes);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
+router.get('/', async (req, res) => {
+    try {
+        const quizzes = await Quiz.find(); 
+        res.status(200).json(quizzes); 
+    } catch (error) {
+        console.error('Error fetching quizzes:', error.message);
+        res.status(500).json({ message: 'Server error.' });
+    }
 });
 
-router.post("/", async (req, res) => {
-  const data = req.body;
-  try {
-    const newQuiz = await new Quiz(data);
-    newQuiz.save();
-    res.status(200).json(newQuiz);
-  } catch (error) {
-    console.log(error.message);
-  }
+router.post('/', async (req, res) => {
+    const { quizName, quizDesc, quizTime, quizCategory, quizQuestions, quizCreator } = req.body;
+    
+
+    try {
+        const newQuiz = new Quiz({
+            quizName,
+            quizDesc,
+            quizTime,
+            quizCategory,
+            quizQuestions,
+            quizCreator
+        });
+
+        await newQuiz.save();
+        res.status(201).json({ quiz: newQuiz });
+    } catch (error) {
+        console.error('Error creating quiz:', error.message);
+        res.status(500).json({ message: 'Server error.' });
+    }
 });
 
-router.get("/:id", tokenCheck, async (req, res) => {
-  const { id } = req.params;
-  try {
-    const newQuiz = await Quiz.findById(id);
-    res.status(200).json(newQuiz);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
-router.delete("/:id", tokenCheck, async (req, res) => {
-  const { id } = req.params;
-  try {
-    const deletedQuiz = await Quiz.findByIdAndDelete(id);
-  } catch (error) {
-    console.log("Error : ", error.message);
-  }
-});
-
-router.post("/:id/result", tokenCheck, async (req, res) => {
-  const { id } = req.params;
-  const { quizResult } = req.body;
-  try {
-    const updatedQuiz = await Quiz.findByIdAndUpdate(
-      id,
-      {
-        $push: { results: quizResult },
-      },
-      { new: true, useFindAndModify: false }
-    );
-    res.status(200).json(updatedQuiz);
-  } catch (error) {
-    console.log(error.message);
-  }
-});
 
 module.exports = router;
